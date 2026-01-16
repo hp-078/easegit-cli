@@ -2,26 +2,69 @@
 
 // Post-checkout hook - creates checkpoint after checkout
 // Also detects failures and warns user
-const path = require('path');
-const defaultRoot = path.join(__dirname, '..', '..');
-const configuredRoot = process.env.EASEGIT_PACKAGE_ROOT || "__EASEGIT_PACKAGE_ROOT__";
-const packageRoot = configuredRoot.startsWith('__EASEGIT_PACKAGE_ROOT__') ? defaultRoot : configuredRoot;
-const { createCheckpoint } = require(path.join(packageRoot, 'dist', 'snapshot', 'create'));
-const { hasMergeConflicts, isDetachedHead, isDirty } = require(path.join(packageRoot, 'dist', 'git', 'plumbing'));
+const fs = require("fs");
+const path = require("path");
 
-// Create checkpoint for the new state
-createCheckpoint('checkout');
-
-// Check for problems after checkout
 try {
-  const hasConflicts = hasMergeConflicts();
-  const detached = isDetachedHead();
-  const dirty = isDirty();
-  
-  if (hasConflicts || (detached && dirty)) {
-    console.error('⚠ EaseGit: last Git operation damaged your working state.');
-    console.error('Run `easegit undo` to restore the last safe checkpoint.');
+  // Find .git directory by walking up from cwd
+  let gitDir = ".git";
+  if (!fs.existsSync(gitDir)) {
+    let current = process.cwd();
+    while (current !== path.dirname(current)) {
+      const candidate = path.join(current, ".git");
+      if (fs.existsSync(candidate)) {
+        gitDir = candidate;
+        break;
+      }
+      current = path.dirname(current);
+    }
   }
-} catch {
-  // Silent fail
+
+  // Read config written by easegit init
+  const configPath = path.join(gitDir, "easegit.json");
+  const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  const packageRoot = config.packageRoot;
+
+  if (!packageRoot || !fs.existsSync(packageRoot)) {
+    throw new Error(`Invalid easegit config: packageRoot=${packageRoot}`);
+  }
+
+  // Now require the modules using the known package root
+  const { createCheckpoint } = require(path.join(
+    packageRoot,
+    "dist",
+    "snapshot",
+    "create"
+  ));
+  const { hasMergeConflicts, isDetachedHead, isDirty } = require(path.join(
+    packageRoot,
+    "dist",
+    "git",
+    "plumbing"
+  ));
+
+  // Create checkpoint for the new state
+  createCheckpoint("checkout");
+
+  // Check for problems after checkout
+  try {
+    const hasConflicts = hasMergeConflicts();
+    const detached = isDetachedHead();
+    const dirty = isDirty();
+
+    if (hasConflicts || (detached && dirty)) {
+      console.error(
+        "⚠ EaseGit: last Git operation damaged your working state."
+      );
+      console.error("Run `easegit undo` to restore the last safe checkpoint.");
+    }
+  } catch {
+    // Silent fail
+  }
+} catch (err) {
+  console.error(
+    "EaseGit post-checkout hook failed. Run `easegit init` to reinstall hooks."
+  );
+  console.error(`Error: ${err.message}`);
+  process.exit(1);
 }

@@ -9,11 +9,17 @@ export async function init(): Promise<void> {
   
   const gitDir = getGitDir();
   const hooksDir = path.join(gitDir, 'hooks');
+  const configPath = path.join(gitDir, 'easegit.json');
   
   // Ensure hooks directory exists
   if (!fs.existsSync(hooksDir)) {
     fs.mkdirSync(hooksDir, { recursive: true });
   }
+  
+  // Write config file so hooks can find the package
+  const packageRoot = path.join(__dirname, '..');
+  const config = { packageRoot };
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
   
   // Hook definitions
   const hooks = [
@@ -26,7 +32,6 @@ export async function init(): Promise<void> {
   // Get the hooks template directory (from installed package)
   // This will be in node_modules/easegit/hooks or local hooks/ during development
   const packageHooksDir = path.join(__dirname, '..', 'hooks');
-  const packageRoot = path.join(__dirname, '..');
   
   // Install hooks
   for (const hookName of hooks) {
@@ -34,11 +39,9 @@ export async function init(): Promise<void> {
     const templatePath = path.join(packageHooksDir, hookName);
     
     if (fs.existsSync(templatePath)) {
-      // Copy the hook template and stamp in the absolute package root so hooks work even when the
-      // package is installed globally (no node_modules in the target repo).
+      // Copy the hook template as-is; hooks will read .git/easegit.json for package root
       const hookContent = fs.readFileSync(templatePath, 'utf8');
-      const stampedContent = hookContent.replace(/__EASEGIT_PACKAGE_ROOT__/g, packageRoot.replace(/\\/g, '/'));
-      fs.writeFileSync(hookPath, stampedContent, { mode: 0o755 });
+      fs.writeFileSync(hookPath, hookContent, { mode: 0o755 });
     }
   }
   

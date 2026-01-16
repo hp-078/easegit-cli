@@ -1,10 +1,45 @@
 #!/usr/bin/env node
 
 // Pre-push hook - creates checkpoint before push
-const path = require('path');
-const defaultRoot = path.join(__dirname, '..', '..');
-const configuredRoot = process.env.EASEGIT_PACKAGE_ROOT || "__EASEGIT_PACKAGE_ROOT__";
-const packageRoot = configuredRoot.startsWith('__EASEGIT_PACKAGE_ROOT__') ? defaultRoot : configuredRoot;
-const { createCheckpoint } = require(path.join(packageRoot, 'dist', 'snapshot', 'create'));
+const fs = require("fs");
+const path = require("path");
 
-createCheckpoint('push');
+try {
+  // Find .git directory by walking up from cwd
+  let gitDir = ".git";
+  if (!fs.existsSync(gitDir)) {
+    let current = process.cwd();
+    while (current !== path.dirname(current)) {
+      const candidate = path.join(current, ".git");
+      if (fs.existsSync(candidate)) {
+        gitDir = candidate;
+        break;
+      }
+      current = path.dirname(current);
+    }
+  }
+
+  // Read config written by easegit init
+  const configPath = path.join(gitDir, "easegit.json");
+  const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  const packageRoot = config.packageRoot;
+
+  if (!packageRoot || !fs.existsSync(packageRoot)) {
+    throw new Error(`Invalid easegit config: packageRoot=${packageRoot}`);
+  }
+
+  // Now require the module using the known package root
+  const { createCheckpoint } = require(path.join(
+    packageRoot,
+    "dist",
+    "snapshot",
+    "create"
+  ));
+  createCheckpoint("push");
+} catch (err) {
+  console.error(
+    "EaseGit pre-push hook failed. Run `easegit init` to reinstall hooks."
+  );
+  console.error(`Error: ${err.message}`);
+  process.exit(1);
+}
