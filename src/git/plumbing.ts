@@ -110,7 +110,8 @@ export function createCheckpointRef(treeSha: string, operation: string): string 
  */
 export function getLatestCheckpointRef(): string | null {
   try {
-    const refs = gitExec(['for-each-ref', 'refs/easegit/checkpoints/', '--sort=-refname', '--format=%(refname)', '--count=1']);
+    // Use -version:refname to sort refs numerically by the timestamp in the refname
+    const refs = gitExec(['for-each-ref', 'refs/easegit/checkpoints/', '--sort=-version:refname', '--format=%(refname)', '--count=1']);
     return refs || null;
   } catch {
     return null;
@@ -141,16 +142,20 @@ export function getCheckpointInfo(refName: string): { timestamp: number; operati
 }
 
 /**
- * Restore working directory from a tree SHA
+ * Restore working directory from a commit SHA (restores all files including untracked)
  */
 export function restoreFromTree(commitSha: string): void {
-  const repoRoot = getRepoRoot();
+  // Get the tree from the commit
+  const treeSha = gitExec(['rev-parse', `${commitSha}^{tree}`]);
   
-  // Clear working directory (except .git)
+  // Read the tree into index
+  gitExec(['read-tree', treeSha]);
+  
+  // Checkout all files from index into working directory
+  gitExec(['checkout-index', '-f', '-a']);
+  
+  // Clean up any files that existed in the old checkpoint but not the new one
   gitExec(['clean', '-fd']);
-  
-  // Checkout the tree without moving HEAD
-  gitExec(['checkout', commitSha, '--', '.']);
 }
 
 /**
