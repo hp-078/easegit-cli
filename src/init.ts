@@ -26,6 +26,7 @@ export async function init(): Promise<void> {
   // Get the hooks template directory (from installed package)
   // This will be in node_modules/easegit/hooks or local hooks/ during development
   const packageHooksDir = path.join(__dirname, '..', 'hooks');
+  const packageRoot = path.join(__dirname, '..');
   
   // Install hooks
   for (const hookName of hooks) {
@@ -33,9 +34,11 @@ export async function init(): Promise<void> {
     const templatePath = path.join(packageHooksDir, hookName);
     
     if (fs.existsSync(templatePath)) {
-      // Copy the hook template
+      // Copy the hook template and stamp in the absolute package root so hooks work even when the
+      // package is installed globally (no node_modules in the target repo).
       const hookContent = fs.readFileSync(templatePath, 'utf8');
-      fs.writeFileSync(hookPath, hookContent, { mode: 0o755 });
+      const stampedContent = hookContent.replace(/__EASEGIT_PACKAGE_ROOT__/g, packageRoot.replace(/\\/g, '/'));
+      fs.writeFileSync(hookPath, stampedContent, { mode: 0o755 });
     }
   }
   

@@ -3,9 +3,11 @@
 // Post-checkout hook - creates checkpoint after checkout
 // Also detects failures and warns user
 const path = require('path');
-const mainPath = path.join(__dirname, '..', '..');
-const { createCheckpoint } = require(path.join(mainPath, 'dist', 'snapshot', 'create'));
-const { hasMergeConflicts, isDetachedHead, isDirty } = require(path.join(mainPath, 'dist', 'git', 'plumbing'));
+const defaultRoot = path.join(__dirname, '..', '..');
+const configuredRoot = process.env.EASEGIT_PACKAGE_ROOT || "__EASEGIT_PACKAGE_ROOT__";
+const packageRoot = configuredRoot.startsWith('__EASEGIT_PACKAGE_ROOT__') ? defaultRoot : configuredRoot;
+const { createCheckpoint } = require(path.join(packageRoot, 'dist', 'snapshot', 'create'));
+const { hasMergeConflicts, isDetachedHead, isDirty } = require(path.join(packageRoot, 'dist', 'git', 'plumbing'));
 
 // Create checkpoint for the new state
 createCheckpoint('checkout');

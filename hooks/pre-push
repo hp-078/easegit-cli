@@ -2,7 +2,9 @@
 
 // Pre-push hook - creates checkpoint before push
 const path = require('path');
-const mainPath = path.join(__dirname, '..', '..');
-const { createCheckpoint } = require(path.join(mainPath, 'dist', 'snapshot', 'create'));
+const defaultRoot = path.join(__dirname, '..', '..');
+const configuredRoot = process.env.EASEGIT_PACKAGE_ROOT || "__EASEGIT_PACKAGE_ROOT__";
+const packageRoot = configuredRoot.startsWith('__EASEGIT_PACKAGE_ROOT__') ? defaultRoot : configuredRoot;
+const { createCheckpoint } = require(path.join(packageRoot, 'dist', 'snapshot', 'create'));
 
 createCheckpoint('push');
