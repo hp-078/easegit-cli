@@ -10,9 +10,12 @@ export function createCheckpoint(operation: string): void {
     
     // Store as checkpoint ref
     createCheckpointRef(treeSha, operation);
-  } catch (error) {
-    // Silently fail - checkpoints are best-effort
-    // We never want to block the user's Git operation
+  } catch (error: any) {
+    // Log errors to help debug, but don't block the operation
+    // Checkpoints are best-effort and should never fail a git operation
+    if (process.env.EASEGIT_DEBUG) {
+      console.error('[EaseGit Debug] Checkpoint creation failed:', error.message);
+    }
   }
 }
 
