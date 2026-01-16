@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+// Pre-rebase hook - creates checkpoint before rebase
+const path = require('path');
+const mainPath = path.join(__dirname, '..', '..');
+const { createCheckpoint } = require(path.join(mainPath, 'dist', 'snapshot', 'create'));
+
+createCheckpoint('rebase');

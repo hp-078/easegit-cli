@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+// Pre-push hook - creates checkpoint before push
+const path = require('path');
+const mainPath = path.join(__dirname, '..', '..');
+const { createCheckpoint } = require(path.join(mainPath, 'dist', 'snapshot', 'create'));
+
+createCheckpoint('push');

@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+
+// Post-checkout hook - creates checkpoint after checkout
+// Also detects failures and warns user
+const path = require('path');
+const mainPath = path.join(__dirname, '..', '..');
+const { createCheckpoint } = require(path.join(mainPath, 'dist', 'snapshot', 'create'));
+const { hasMergeConflicts, isDetachedHead, isDirty } = require(path.join(mainPath, 'dist', 'git', 'plumbing'));
+
+// Create checkpoint for the new state
+createCheckpoint('checkout');
+
+// Check for problems after checkout
+try {
+  const hasConflicts = hasMergeConflicts();
+  const detached = isDetachedHead();
+  const dirty = isDirty();
+  
+  if (hasConflicts || (detached && dirty)) {
+    console.error('⚠ EaseGit: last Git operation damaged your working state.');
+    console.error('Run `easegit undo` to restore the last safe checkpoint.');
+  }
+} catch {
+  // Silent fail
+}
