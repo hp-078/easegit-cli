@@ -1,0 +1,34 @@
+{
+  "name": "easegit",
+  "version": "1.0.0",
+  "description": "Automatic checkpoints before Git can hurt you",
+  "main": "dist/index.js",
+  "bin": {
+    "easegit": "./bin/easegit"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "hooks"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "git",
+    "undo",
+    "safety",
+    "checkpoint"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
