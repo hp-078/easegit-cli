@@ -8,8 +8,8 @@ cd easegit-CLI
 npm install
 npm run build
 
-# 2. Link globally (optional - makes 'easegit' available everywhere)
-npm link
+# 2. Install globally (makes 'easegit' and 'easegit-cli' available everywhere)
+npm install -g easegit-cli
 
 # 3. Initialize in your Git repository
 cd /path/to/your/repo
@@ -17,6 +17,8 @@ easegit init
 ```
 
 Done! EaseGit is now protecting you.
+
+No global install? Use `npx easegit init` (or `npx easegit-cli init`). On Windows, make sure `%AppData%\npm` is on `PATH`.
 
 ## Daily Usage
 

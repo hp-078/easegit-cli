@@ -4,7 +4,8 @@
   "description": "Automatic checkpoints before Git can hurt you",
   "main": "dist/index.js",
   "bin": {
-    "easegit": "./bin/easegit"
+    "easegit": "./bin/easegit",
+    "easegit-cli": "./bin/easegit"
   },
   "files": [
     "dist",

@@ -14,10 +14,12 @@ EaseGit creates automatic safety checkpoints before dangerous Git operations and
 ## Installation
 
 ```bash
-npm install -g easegit
+npm install -g easegit-cli   # installs command names: easegit (preferred) and easegit-cli
 cd my-repo
-easegit init
+easegit init                 # or: easegit-cli init
 ```
+
+No global install? Use `npx easegit init` (or `npx easegit-cli init`). On Windows ensure your global npm bin (e.g., `%AppData%\npm`) is on `PATH`.
 
 ## Usage
 
