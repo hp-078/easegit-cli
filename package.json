@@ -1,5 +1,5 @@
 {
-  "name": "easegit",
+  "name": "easegit-cli",
   "version": "1.0.0",
   "description": "Automatic checkpoints before Git can hurt you",
   "main": "dist/index.js",
@@ -9,7 +9,8 @@
   "files": [
     "dist",
     "bin",
-    "hooks"
+    "hooks",
+    "README.md"
   ],
   "scripts": {
     "build": "tsc",
@@ -19,9 +20,19 @@
     "git",
     "undo",
     "safety",
-    "checkpoint"
+    "checkpoint",
+    "git-safety",
+    "git-undo"
   ],
-  "author": "",
+  "author": "hp-078",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hp-078/easegit-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hp-078/easegit-cli/issues"
+  },
+  "homepage": "https://github.com/hp-078/easegit-cli#readme",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.0.0",
