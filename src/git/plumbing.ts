@@ -1,19 +1,26 @@
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 import * as path from 'path';
 
 /**
  * Execute a Git command and return output
  */
 export function gitExec(args: string[], cwd?: string): string {
-  try {
-    return execSync(`git ${args.join(' ')}`, {
-      cwd: cwd || process.cwd(),
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe']
-    }).trim();
-  } catch (error: any) {
-    throw new Error(`Git command failed: ${error.message}`);
+  const result = spawnSync('git', args, {
+    cwd: cwd || process.cwd(),
+    encoding: 'utf8',
+    stdio: ['pipe', 'pipe', 'pipe']
+  });
+  
+  if (result.error) {
+    throw new Error(`Git command failed: ${result.error.message}`);
   }
+  
+  if (result.status !== 0) {
+    const stderr = result.stderr ? result.stderr.toString().trim() : '';
+    throw new Error(`Git command failed: ${stderr || 'Unknown error'}`);
+  }
+  
+  return (result.stdout || '').toString().trim();
 }
 
 /**
