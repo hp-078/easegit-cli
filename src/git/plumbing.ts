@@ -86,10 +86,8 @@ export function createCheckpointRef(treeSha: string, operation: string): string 
   const refName = `refs/easegit/checkpoints/${timestamp}`;
   
   // Create a commit object for the checkpoint
-  const message = `EaseGit checkpoint before ${operation}\nTimestamp: ${timestamp}`;
-  
-  // Use current HEAD as parent if it exists
-  const commitArgs = ['commit-tree', treeSha, '-m', message];
+  // Use multiple -m flags for multi-line messages (Windows compatible)
+  const commitArgs = ['commit-tree', treeSha, '-m', `EaseGit checkpoint before ${operation}`, '-m', `Timestamp: ${timestamp}`];
   try {
     const head = gitExec(['rev-parse', 'HEAD']);
     commitArgs.splice(2, 0, '-p', head);
@@ -148,14 +146,17 @@ export function restoreFromTree(commitSha: string): void {
   // Get the tree from the commit
   const treeSha = gitExec(['rev-parse', `${commitSha}^{tree}`]);
   
+  // Clear working directory first (except .git)
+  gitExec(['clean', '-fd']);
+  
   // Read the tree into index
   gitExec(['read-tree', treeSha]);
   
   // Checkout all files from index into working directory
   gitExec(['checkout-index', '-f', '-a']);
   
-  // Clean up any files that existed in the old checkpoint but not the new one
-  gitExec(['clean', '-fd']);
+  // Reset the index to match the restored tree so git status shows clean
+  gitExec(['reset', '--mixed']);
 }
 
 /**
