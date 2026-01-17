@@ -62,6 +62,7 @@ Shows when the last checkpoint was created and what operation triggered it.
 
 EaseGit installs Git hooks that automatically create checkpoints before:
 
+- `git commit`
 - `git rebase`
 - `git merge`
 - `git push`

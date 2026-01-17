@@ -1,0 +1,45 @@
+#!/usr/bin/env node
+
+// Pre-commit hook - creates checkpoint before commit
+const fs = require("fs");
+const path = require("path");
+
+try {
+  // Find .git directory by walking up from cwd
+  let gitDir = ".git";
+  if (!fs.existsSync(gitDir)) {
+    let current = process.cwd();
+    while (current !== path.dirname(current)) {
+      const candidate = path.join(current, ".git");
+      if (fs.existsSync(candidate)) {
+        gitDir = candidate;
+        break;
+      }
+      current = path.dirname(current);
+    }
+  }
+
+  // Read config written by easegit init
+  const configPath = path.join(gitDir, "easegit.json");
+  const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  const packageRoot = config.packageRoot;
+
+  if (!packageRoot || !fs.existsSync(packageRoot)) {
+    throw new Error(`Invalid easegit config: packageRoot=${packageRoot}`);
+  }
+
+  // Now require the module using the known package root
+  const { createCheckpoint } = require(path.join(
+    packageRoot,
+    "dist",
+    "snapshot",
+    "create"
+  ));
+  createCheckpoint("commit");
+} catch (err) {
+  console.error(
+    "EaseGit pre-commit hook failed. Run `easegit init` to reinstall hooks."
+  );
+  console.error(`Error: ${err.message}`);
+  process.exit(1);
+}

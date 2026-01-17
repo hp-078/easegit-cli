@@ -23,6 +23,7 @@ export async function init(): Promise<void> {
   
   // Hook definitions
   const hooks = [
+    'pre-commit',
     'pre-rebase',
     'pre-merge-commit',
     'pre-push',
