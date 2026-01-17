@@ -1,6 +1,6 @@
 {
   "name": "easegit-cli",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Automatic checkpoints before Git can hurt you",
   "main": "dist/index.js",
   "bin": {

@@ -21,9 +21,12 @@ export async function init(): Promise<void> {
   const config = { packageRoot };
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
   
-  // Hook definitions
+  // Hook definitions - only hooks that protect against losing work
+  // pre-rebase: rebase can destroy uncommitted work
+  // pre-merge-commit: merge can create conflicts and lose work
+  // pre-push: checkpoint before pushing (safety net)
+  // post-checkout: checkout can discard uncommitted changes
   const hooks = [
-    'pre-commit',
     'pre-rebase',
     'pre-merge-commit',
     'pre-push',
